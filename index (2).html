@@ -1,0 +1,1925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Shiftly — Workforce Attendance System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-deep:    #07080b;
+  --bg-surface: #0d0f14;
+  --bg-card:    #131620;
+  --bg-raised:  #1a1e2b;
+  --bg-hover:   #202535;
+  --border:     #222736;
+  --border-hi:  #2d3347;
+  --cyan:       #00e5c8;
+  --cyan-dim:   #00b89f;
+  --cyan-glow:  rgba(0,229,200,0.14);
+  --amber:      #f5a623;
+  --amber-dim:  #c4841a;
+  --amber-glow: rgba(245,166,35,0.12);
+  --red:        #ff4d6d;
+  --red-dim:    #cc3d57;
+  --red-glow:   rgba(255,77,109,0.12);
+  --green:      #2ddb8a;
+  --green-dim:  #24af6e;
+  --green-glow: rgba(45,219,138,0.12);
+  --purple:     #a78bfa;
+  --purple-glow:rgba(167,139,250,0.12);
+  --text-1:     #e8eaf2;
+  --text-2:     #8b92aa;
+  --text-3:     #555d72;
+  --text-4:     #3a4052;
+  --font-display: 'Syne', sans-serif;
+  --font-mono:    'DM Mono', monospace;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
+}
+
+html, body {
+  background: var(--bg-deep);
+  color: var(--text-1);
+  font-family: var(--font-mono);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── ANIMATED GRID BACKGROUND ── */
+body::after {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(0,229,200,0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,200,0.022) 1px, transparent 1px);
+  background-size: 52px 52px;
+}
+
+/* ── RADIAL GLOW ── */
+.bg-glow {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(0,229,200,0.055) 0%, transparent 70%);
+}
+
+/* ════════════════════════════════
+   SCREEN
+════════════════════════════════ */
+.screen {
+  position: fixed; inset: 0; z-index: 10;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  transition: opacity 0.38s ease, transform 0.38s ease;
+}
+.screen.hidden { opacity: 0; pointer-events: none; transform: translateY(12px); }
+
+/* ════════════════════════════════
+   LOGIN
+════════════════════════════════ */
+.login-wrapper {
+  width: 100%; max-width: 440px;
+  display: flex; flex-direction: column; gap: 0;
+  animation: fadeUp 0.5s ease both;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.login-brand {
+  margin-bottom: 36px;
+}
+
+.brand-mark {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 6px;
+}
+
+.brand-dot {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 14px var(--cyan);
+  animation: pulseDot 2.2s ease-in-out infinite;
+}
+
+.brand-dot { display: none; }
+
+.brand-name {
+  font-family: var(--font-display);
+  font-weight: 800; font-size: 26px;
+  letter-spacing: -0.4px; color: var(--text-1);
+}
+
+.brand-tagline {
+  font-size: 12px; color: var(--text-3);
+  letter-spacing: 0.06em;
+}
+
+.login-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 38px;
+  position: relative; overflow: hidden;
+}
+
+.login-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent 10%, var(--cyan) 50%, transparent 90%);
+  opacity: 0.55;
+}
+
+.login-title {
+  font-family: var(--font-display);
+  font-weight: 700; font-size: 20px;
+  color: var(--text-1); margin-bottom: 6px;
+}
+
+.login-desc {
+  font-size: 12px; color: var(--text-3);
+  margin-bottom: 30px; line-height: 1.7;
+}
+
+.field-group { margin-bottom: 18px; }
+
+.field-label {
+  display: block; font-size: 10.5px; font-weight: 500;
+  letter-spacing: 0.13em; text-transform: uppercase;
+  color: var(--text-3); margin-bottom: 8px;
+}
+
+.field-input {
+  width: 100%;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 13px 16px;
+  font-family: var(--font-mono); font-size: 14px;
+  color: var(--text-1); outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+  letter-spacing: 0.02em;
+}
+.field-input::placeholder { color: var(--text-4); }
+.field-input:focus {
+  border-color: var(--cyan-dim);
+  box-shadow: 0 0 0 3px var(--cyan-glow);
+}
+.field-input.err {
+  border-color: var(--red);
+  box-shadow: 0 0 0 3px var(--red-glow);
+}
+
+.field-err {
+  font-size: 11.5px; color: var(--red);
+  margin-top: 7px; display: none; letter-spacing: 0.02em;
+}
+.field-err.show { display: block; }
+
+/* Late badge shown on login if after 9am */
+.late-notice {
+  display: none;
+  background: var(--red-glow);
+  border: 1px solid rgba(255,77,109,0.3);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  margin-bottom: 18px;
+  font-size: 12px; color: var(--red);
+  letter-spacing: 0.02em; line-height: 1.6;
+}
+.late-notice.show { display: block; }
+
+.btn-primary {
+  width: 100%;
+  background: var(--cyan); color: #030807;
+  font-family: var(--font-display); font-weight: 700;
+  font-size: 13.5px; letter-spacing: 0.06em; text-transform: uppercase;
+  border: none; border-radius: var(--radius-md);
+  padding: 15px 24px; cursor: pointer; margin-top: 10px;
+  transition: background var(--transition), box-shadow var(--transition), transform 0.1s;
+  position: relative; overflow: hidden;
+}
+.btn-primary:hover { background: var(--cyan-dim); box-shadow: 0 8px 28px rgba(0,229,200,0.28); }
+.btn-primary:active { transform: scale(0.98); }
+
+.login-footer {
+  margin-top: 18px; font-size: 11px; color: var(--text-4);
+  text-align: center; line-height: 1.8;
+}
+
+/* ════════════════════════════════
+   DASHBOARD
+════════════════════════════════ */
+.dash-scroll {
+  width: 100%; height: 100%; overflow-y: auto; padding: 20px;
+  display: flex; flex-direction: column; align-items: center; gap: 0;
+}
+.dash-scroll::-webkit-scrollbar { width: 5px; }
+.dash-scroll::-webkit-scrollbar-track { background: transparent; }
+.dash-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+.dash-layout {
+  width: 100%; max-width: 760px;
+  display: flex; flex-direction: column; gap: 18px;
+  padding: 20px 0 40px;
+  animation: fadeUp 0.4s ease both;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px 20px;
+  flex-wrap: wrap; gap: 12px;
+}
+
+.topbar-left { display: flex; align-items: center; gap: 13px; }
+
+.avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--bg-raised);
+  border: 1.5px solid var(--border-hi);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-weight: 700; font-size: 15px;
+  color: var(--cyan); flex-shrink: 0;
+  box-shadow: 0 0 16px rgba(0,229,200,0.1);
+}
+
+.topbar-name {
+  font-family: var(--font-display); font-weight: 600; font-size: 15px; color: var(--text-1);
+}
+.topbar-email { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+
+.clock-wrap { text-align: right; }
+.live-clock {
+  font-family: var(--font-mono); font-size: 15px; color: var(--text-2);
+  letter-spacing: 0.1em;
+}
+.live-date { font-size: 10px; color: var(--text-3); margin-top: 2px; letter-spacing: 0.06em; }
+
+.badge-late {
+  display: none;
+  background: var(--red-glow);
+  border: 1px solid rgba(255,77,109,0.3);
+  border-radius: 6px; padding: 4px 10px;
+  font-size: 10.5px; color: var(--red);
+  letter-spacing: 0.06em; text-transform: uppercase;
+  animation: pulseRed 2s ease infinite;
+}
+.badge-late.show { display: inline-block; }
+
+@keyframes pulseRed {
+  0%, 100% { opacity: 1; } 50% { opacity: 0.5; }
+}
+
+.btn-logout {
+  background: transparent; border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 8px 13px;
+  font-family: var(--font-mono); font-size: 11.5px; color: var(--text-3);
+  cursor: pointer; transition: all var(--transition); letter-spacing: 0.04em;
+}
+.btn-logout:hover { color: var(--red); border-color: var(--red); }
+
+/* ── STATUS BANNER ── */
+.status-banner {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 22px 26px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 16px;
+  position: relative; overflow: hidden;
+  transition: border-color 0.35s, box-shadow 0.35s;
+}
+.status-banner::after {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+  opacity: 0; transition: opacity 0.35s;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+.state-idle   { border-color: var(--border); }
+.state-shift  { border-color: rgba(45,219,138,0.3); box-shadow: 0 0 48px rgba(45,219,138,0.06); }
+.state-shift::after  { background: var(--green); opacity: 0.6; }
+.state-break  { border-color: rgba(245,166,35,0.3); box-shadow: 0 0 48px rgba(245,166,35,0.06); }
+.state-break::after  { background: var(--amber); opacity: 0.6; }
+.state-lunch  { border-color: rgba(0,229,200,0.3); box-shadow: 0 0 48px rgba(0,229,200,0.06); }
+.state-lunch::after  { background: var(--cyan); opacity: 0.6; }
+.state-done   { border-color: rgba(255,77,109,0.25); }
+.state-done::after   { background: var(--red); opacity: 0.4; }
+
+.status-left { display: flex; align-items: center; gap: 14px; }
+
+.status-dot {
+  width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0;
+  transition: background 0.3s, box-shadow 0.3s;
+}
+.state-idle  .status-dot { background: var(--text-4); }
+.state-shift .status-dot { background: var(--green); box-shadow: 0 0 12px var(--green); animation: blinkDot 2.2s ease infinite; }
+.state-break .status-dot { background: var(--amber); box-shadow: 0 0 12px var(--amber); animation: blinkDot 1.6s ease infinite; }
+.state-lunch .status-dot { background: var(--cyan);  box-shadow: 0 0 12px var(--cyan);  animation: blinkDot 2s ease infinite; }
+.state-done  .status-dot { background: var(--red); box-shadow: 0 0 8px var(--red); }
+
+@keyframes blinkDot { 0%,100%{opacity:1} 50%{opacity:0.25} }
+
+.status-label {
+  font-family: var(--font-display); font-weight: 700; font-size: 19px;
+  transition: color 0.3s;
+}
+.state-idle  .status-label { color: var(--text-3); }
+.state-shift .status-label { color: var(--green); }
+.state-break .status-label { color: var(--amber); }
+.state-lunch .status-label { color: var(--cyan); }
+.state-done  .status-label { color: var(--red); }
+
+.status-sub { font-size: 11.5px; color: var(--text-3); margin-top: 3px; letter-spacing: 0.03em; }
+
+.elapsed-wrap { text-align: right; }
+.elapsed-timer {
+  font-family: var(--font-mono); font-size: 30px; font-weight: 400;
+  letter-spacing: 0.06em; color: var(--text-3);
+  transition: color 0.3s;
+}
+.state-shift .elapsed-timer { color: var(--green); }
+.state-break .elapsed-timer { color: var(--amber); }
+.state-lunch .elapsed-timer { color: var(--cyan); }
+
+.elapsed-label { font-size: 10px; color: var(--text-4); margin-top: 2px; text-align: right; letter-spacing: 0.06em; }
+
+/* Net hours mini display */
+.net-badge {
+  display: flex; align-items: center; gap: 7px;
+  background: var(--bg-raised); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 6px 12px;
+  font-size: 11px; color: var(--text-3);
+}
+.net-badge strong { color: var(--text-2); font-size: 13px; }
+
+/* ── STATS ROW ── */
+.stats-row {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+}
+
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  transition: border-color var(--transition);
+}
+
+.stat-card:hover { border-color: var(--border-hi); }
+
+.stat-label {
+  font-size: 10.5px; color: var(--text-4); letter-spacing: 0.1em;
+  text-transform: uppercase; margin-bottom: 8px;
+}
+
+.stat-value {
+  font-family: var(--font-mono); font-size: 20px;
+  color: var(--text-2); letter-spacing: 0.04em;
+  transition: color 0.3s;
+}
+
+.stat-card.active-green .stat-value { color: var(--green); }
+.stat-card.active-amber .stat-value  { color: var(--amber); }
+.stat-card.active-cyan .stat-value   { color: var(--cyan); }
+
+.stat-sub {
+  font-size: 10px; color: var(--text-4); margin-top: 4px; letter-spacing: 0.04em;
+}
+
+/* ── ACTION GRID ── */
+.action-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+}
+
+.action-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 22px 20px;
+  cursor: pointer; text-align: left;
+  transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition), opacity var(--transition);
+  position: relative; overflow: hidden;
+  font-family: var(--font-mono);
+}
+
+.action-btn:not(:disabled):hover { transform: translateY(-2px); }
+.action-btn:not(:disabled).variant-green:hover  { border-color: var(--green); box-shadow: 0 4px 28px var(--green-glow); }
+.action-btn:not(:disabled).variant-amber:hover  { border-color: var(--amber); box-shadow: 0 4px 28px var(--amber-glow); }
+.action-btn:not(:disabled).variant-cyan:hover   { border-color: var(--cyan);  box-shadow: 0 4px 28px var(--cyan-glow); }
+.action-btn:not(:disabled).variant-red:hover    { border-color: var(--red);   box-shadow: 0 4px 28px var(--red-glow); }
+
+.action-btn:disabled { opacity: 0.28; cursor: not-allowed; transform: none !important; }
+
+.action-icon {
+  width: 36px; height: 36px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 14px; flex-shrink: 0;
+}
+.variant-green .action-icon { background: var(--green-glow); }
+.variant-amber .action-icon { background: var(--amber-glow); }
+.variant-cyan  .action-icon { background: var(--cyan-glow); }
+.variant-red   .action-icon { background: var(--red-glow); }
+
+.action-name {
+  font-family: var(--font-display); font-weight: 700; font-size: 15px;
+  margin-bottom: 5px;
+}
+.variant-green .action-name { color: var(--green); }
+.variant-amber .action-name { color: var(--amber); }
+.variant-cyan  .action-name { color: var(--cyan); }
+.variant-red   .action-name { color: var(--red); }
+
+.action-desc { font-size: 11px; color: var(--text-3); line-height: 1.5; letter-spacing: 0.02em; }
+
+.action-time-tag {
+  position: absolute; top: 13px; right: 13px;
+  font-size: 10px; color: var(--text-3);
+  background: var(--bg-raised); border: 1px solid var(--border);
+  border-radius: 5px; padding: 3px 8px; letter-spacing: 0.05em;
+}
+
+/* ── BOTTOM PANELS ── */
+.panels-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+}
+
+/* ── LOG PANEL ── */
+.log-panel, .timeline-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.panel-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.panel-title {
+  font-family: var(--font-display); font-weight: 600; font-size: 12px;
+  letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-3);
+}
+
+.panel-badge {
+  font-size: 10.5px; color: var(--text-3);
+  background: var(--bg-raised); border: 1px solid var(--border);
+  border-radius: 20px; padding: 3px 9px; letter-spacing: 0.04em;
+}
+
+.log-body {
+  max-height: 200px; overflow-y: auto; padding: 6px 0;
+}
+.log-body::-webkit-scrollbar { width: 4px; }
+.log-body::-webkit-scrollbar-track { background: transparent; }
+.log-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+.log-entry {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 9px 18px;
+  border-bottom: 1px solid var(--border);
+  animation: slideIn 0.28s ease;
+}
+.log-entry:last-child { border-bottom: none; }
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-6px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.log-time { font-size: 10.5px; color: var(--text-4); letter-spacing: 0.06em; flex-shrink: 0; margin-top: 2px; width: 50px; }
+.log-msg  { font-size: 12.5px; color: var(--text-2); flex: 1; line-height: 1.5; }
+.log-msg strong { color: var(--text-1); font-weight: 500; }
+
+.log-pill {
+  font-size: 9.5px; letter-spacing: 0.07em; text-transform: uppercase;
+  border-radius: 4px; padding: 2px 7px; flex-shrink: 0; margin-top: 2px;
+}
+.pill-green  { background: var(--green-glow);  color: var(--green); border: 1px solid rgba(45,219,138,0.2); }
+.pill-amber  { background: var(--amber-glow);  color: var(--amber); border: 1px solid rgba(245,166,35,0.2); }
+.pill-cyan   { background: var(--cyan-glow);   color: var(--cyan);  border: 1px solid rgba(0,229,200,0.2); }
+.pill-red    { background: var(--red-glow);    color: var(--red);   border: 1px solid rgba(255,77,109,0.2); }
+.pill-purple { background: var(--purple-glow); color: var(--purple);border: 1px solid rgba(167,139,250,0.2); }
+.pill-gray   { background: var(--bg-raised);   color: var(--text-3);border: 1px solid var(--border); }
+
+.log-empty {
+  padding: 30px 18px; text-align: center;
+  font-size: 12px; color: var(--text-4); letter-spacing: 0.05em;
+}
+
+/* ── TIMELINE ── */
+.timeline-body { padding: 14px 20px; }
+
+.timeline-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 7px 0; position: relative;
+}
+
+.timeline-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  flex-shrink: 0; margin-top: 4px;
+  border: 1.5px solid var(--border-hi); background: var(--bg-raised);
+  transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+}
+.timeline-dot.done-green  { background: var(--green); border-color: var(--green); box-shadow: 0 0 8px var(--green); }
+.timeline-dot.done-amber  { background: var(--amber); border-color: var(--amber); box-shadow: 0 0 8px var(--amber); }
+.timeline-dot.done-cyan   { background: var(--cyan);  border-color: var(--cyan);  box-shadow: 0 0 8px var(--cyan); }
+.timeline-dot.done-red    { background: var(--red);   border-color: var(--red);   box-shadow: 0 0 8px var(--red); }
+
+.timeline-content { flex: 1; }
+.timeline-event { font-size: 12px; color: var(--text-2); letter-spacing: 0.03em; }
+.timeline-time  { font-size: 10px; color: var(--text-4); margin-top: 2px; }
+
+.timeline-line {
+  position: absolute; left: 3.25px; top: 20px;
+  width: 1px; height: calc(100% + 2px);
+  background: var(--border);
+}
+
+/* ── BREAK MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(7,8,11,0.88);
+  backdrop-filter: blur(10px) saturate(0.8);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.25s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+
+.modal-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-hi);
+  border-radius: 20px;
+  width: 100%; max-width: 420px;
+  padding: 34px;
+  position: relative; overflow: hidden;
+  transform: scale(0.94) translateY(10px);
+  transition: transform 0.28s cubic-bezier(0.34,1.56,0.64,1);
+}
+.modal-overlay.open .modal-card { transform: scale(1) translateY(0); }
+
+.modal-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent 10%, var(--amber) 50%, transparent 90%);
+  opacity: 0.65;
+}
+
+.modal-title {
+  font-family: var(--font-display); font-weight: 700; font-size: 19px;
+  color: var(--text-1); margin-bottom: 5px;
+}
+.modal-sub { font-size: 12px; color: var(--text-3); margin-bottom: 22px; line-height: 1.7; }
+
+.reason-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+
+.reason-opt {
+  background: var(--bg-raised); border: 1px solid var(--border);
+  border-radius: 9px; padding: 11px 14px;
+  font-family: var(--font-mono); font-size: 12px; color: var(--text-2);
+  cursor: pointer; text-align: left; transition: all 0.15s;
+  letter-spacing: 0.02em; line-height: 1.4;
+}
+.reason-opt:hover, .reason-opt.selected {
+  border-color: var(--amber); color: var(--amber); background: var(--amber-glow);
+}
+
+.reason-divider {
+  font-size: 10px; color: var(--text-4); text-align: center;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  margin: 12px 0 10px; position: relative;
+}
+.reason-divider::before, .reason-divider::after {
+  content: ''; position: absolute; top: 50%; width: 38%; height: 1px;
+  background: var(--border);
+}
+.reason-divider::before { left: 0; }
+.reason-divider::after  { right: 0; }
+
+.reason-custom {
+  width: 100%; background: var(--bg-raised); border: 1px solid var(--border);
+  border-radius: 9px; padding: 11px 14px;
+  font-family: var(--font-mono); font-size: 13px; color: var(--text-1);
+  outline: none; resize: none; transition: border-color 0.2s;
+  height: 68px; letter-spacing: 0.02em;
+}
+.reason-custom:focus { border-color: var(--amber); }
+.reason-custom::placeholder { color: var(--text-4); }
+
+.modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+
+.btn-cancel {
+  flex: 1; background: var(--bg-raised); border: 1px solid var(--border);
+  border-radius: 9px; padding: 13px;
+  font-family: var(--font-display); font-weight: 600; font-size: 13px; color: var(--text-2);
+  cursor: pointer; transition: all 0.15s;
+}
+.btn-cancel:hover { border-color: var(--border-hi); color: var(--text-1); }
+
+.btn-confirm {
+  flex: 2; background: var(--amber); border: none; border-radius: 9px; padding: 13px;
+  font-family: var(--font-display); font-weight: 700; font-size: 13px; color: #0a0700;
+  cursor: pointer; transition: all 0.15s;
+}
+.btn-confirm:hover { background: var(--amber-dim); }
+
+/* ── TOAST ── */
+.toast-stack {
+  position: fixed; bottom: 24px; right: 24px; z-index: 300;
+  display: flex; flex-direction: column; gap: 8px;
+}
+
+.toast {
+  background: var(--bg-raised); border: 1px solid var(--border-hi);
+  border-radius: 11px; padding: 13px 18px;
+  font-size: 13px; color: var(--text-1);
+  max-width: 320px; letter-spacing: 0.02em;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.45);
+  animation: toastIn 0.3s ease;
+  display: flex; align-items: center; gap: 10px;
+}
+.toast-success { border-color: rgba(45,219,138,0.35); }
+.toast-warning { border-color: rgba(245,166,35,0.35); }
+.toast-error   { border-color: rgba(255,77,109,0.35); }
+.toast-info    { border-color: rgba(0,229,200,0.3); }
+
+.toast-accent { width: 3.5px; height: 30px; border-radius: 2px; flex-shrink: 0; }
+.toast-success .toast-accent { background: var(--green); }
+.toast-warning .toast-accent { background: var(--amber); }
+.toast-error   .toast-accent { background: var(--red); }
+.toast-info    .toast-accent { background: var(--cyan); }
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(18px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ── SYNC INDICATOR ── */
+.sync-bar {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 11px; color: var(--text-4); letter-spacing: 0.04em;
+  padding: 10px 0 0; justify-content: flex-end;
+}
+.sync-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--text-4);
+  transition: background 0.3s;
+}
+.sync-dot.synced { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.sync-dot.syncing { background: var(--amber); animation: blinkDot 1s ease infinite; }
+.sync-dot.error   { background: var(--red); }
+
+/* ── SHIFT COMPLETE CARD ── */
+.complete-card {
+  display: none;
+  background: var(--bg-card); border: 1px solid rgba(45,219,138,0.25);
+  border-radius: var(--radius-lg); padding: 28px;
+  text-align: center; animation: fadeUp 0.4s ease both;
+  box-shadow: 0 0 48px rgba(45,219,138,0.04);
+}
+.complete-card.show { display: block; }
+
+.complete-icon {
+  width: 54px; height: 54px; border-radius: 50%;
+  background: var(--green-glow); border: 1px solid rgba(45,219,138,0.2);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.complete-title {
+  font-family: var(--font-display); font-weight: 700; font-size: 22px;
+  color: var(--green); margin-bottom: 6px;
+}
+
+.complete-sub { font-size: 13px; color: var(--text-3); margin-bottom: 20px; line-height: 1.7; }
+
+.complete-stats {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+  margin-bottom: 20px;
+}
+
+.cstat {
+  background: var(--bg-raised); border: 1px solid var(--border); border-radius: 10px;
+  padding: 14px 12px;
+}
+.cstat-val { font-family: var(--font-mono); font-size: 18px; color: var(--text-1); }
+.cstat-lbl { font-size: 10px; color: var(--text-4); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.08em; }
+
+.btn-new-shift {
+  background: transparent; border: 1px solid var(--green);
+  border-radius: 10px; padding: 13px 28px;
+  font-family: var(--font-display); font-weight: 700; font-size: 13px;
+  color: var(--green); cursor: pointer; letter-spacing: 0.05em;
+  transition: all var(--transition);
+}
+.btn-new-shift:hover { background: var(--green-glow); box-shadow: 0 0 20px var(--green-glow); }
+
+/* ── GOOGLE SHEETS CONFIG MODAL ── */
+.config-modal {
+  position: fixed; inset: 0; z-index: 400;
+  background: rgba(7,8,11,0.92);
+  backdrop-filter: blur(12px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.25s;
+}
+.config-modal.open { opacity: 1; pointer-events: all; }
+
+.config-card {
+  background: var(--bg-card); border: 1px solid var(--border-hi);
+  border-radius: 20px; width: 100%; max-width: 500px;
+  padding: 34px; position: relative; overflow: hidden;
+  transform: scale(0.94) translateY(10px);
+  transition: transform 0.28s cubic-bezier(0.34,1.56,0.64,1);
+}
+.config-modal.open .config-card { transform: scale(1) translateY(0); }
+
+.config-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent 10%, var(--cyan) 50%, transparent 90%);
+  opacity: 0.55;
+}
+
+.config-title {
+  font-family: var(--font-display); font-weight: 700; font-size: 19px;
+  color: var(--text-1); margin-bottom: 5px;
+}
+.config-sub { font-size: 12px; color: var(--text-3); margin-bottom: 24px; line-height: 1.7; }
+
+.config-note {
+  background: var(--bg-raised); border: 1px solid var(--border);
+  border-left: 3px solid var(--cyan); border-radius: 8px;
+  padding: 12px 14px; margin-bottom: 20px;
+  font-size: 11.5px; color: var(--text-3); line-height: 1.7;
+}
+.config-note code {
+  color: var(--cyan); background: rgba(0,229,200,0.08);
+  padding: 1px 5px; border-radius: 4px; font-family: var(--font-mono);
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 580px) {
+  .action-grid    { grid-template-columns: 1fr; }
+  .panels-row     { grid-template-columns: 1fr; }
+  .stats-row      { grid-template-columns: 1fr 1fr; }
+  .complete-stats { grid-template-columns: 1fr 1fr; }
+  .topbar-right .clock-wrap .live-date { display: none; }
+  .elapsed-timer { font-size: 22px; }
+}
+@media (max-width: 420px) {
+  .stats-row { grid-template-columns: 1fr; }
+  .reason-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+
+<!-- ══════════════════════════════════
+     GOOGLE SHEETS CONFIG MODAL
+══════════════════════════════════ -->
+<div class="config-modal" id="config-modal">
+  <div class="config-card">
+    <div class="config-title">Connect Google Sheets</div>
+    <div class="config-sub">Enter your Google Apps Script Web App URL to enable live data sync. All attendance records will be saved to your spreadsheet automatically.</div>
+
+    <div class="config-note">
+      Deploy a Google Apps Script as a <code>Web App</code> and paste the URL below.<br/>
+      See the included <code>apps-script.gs</code> snippet for the backend code.
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">Apps Script Web App URL</label>
+      <input class="field-input" id="cfg-url" type="url" placeholder="https://script.google.com/macros/s/.../exec" spellcheck="false"/>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">Shift Start Time (Late Detection)</label>
+      <input class="field-input" id="cfg-shift-time" type="time" value="09:00"/>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">Registered Agent Emails (comma-separated)</label>
+      <textarea class="reason-custom" id="cfg-emails" placeholder="alice@company.com, bob@company.com, ..." style="height:80px"></textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeConfig()">Skip for Now</button>
+      <button class="btn-confirm" style="background:var(--cyan);color:#030807;" onclick="saveConfig()">Save & Continue</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     LOGIN SCREEN
+══════════════════════════════════ -->
+<div class="screen" id="screen-login">
+  <div class="login-wrapper">
+    <div class="login-brand">
+      <div class="brand-mark">
+        <!-- Shiftly Logo -->
+        <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+          <rect width="38" height="38" rx="10" fill="url(#logoGrad)"/>
+          <!-- Clock face -->
+          <circle cx="19" cy="19" r="10" stroke="rgba(255,255,255,0.15)" stroke-width="1.2" fill="none"/>
+          <!-- Clock hands forming a shift arrow -->
+          <line x1="19" y1="19" x2="19" y2="12" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          <line x1="19" y1="19" x2="24" y2="22" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          <!-- Shift arrow arc on top right -->
+          <path d="M25.5 11.5 C28 14 29 17 28.5 19.5" stroke="var(--cyan)" stroke-width="2" stroke-linecap="round" fill="none"/>
+          <polyline points="25.5,11.5 27.5,14.5 28.8,11.2" stroke="var(--cyan)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <!-- Center dot -->
+          <circle cx="19" cy="19" r="2" fill="white"/>
+          <defs>
+            <linearGradient id="logoGrad" x1="0" y1="0" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#1a2235"/>
+              <stop offset="100%" stop-color="#0d1420"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="brand-name">Shiftly</div>
+      </div>
+      <div class="brand-tagline">Workforce Attendance System &mdash; v3.0</div>
+    </div>
+
+    <div class="login-card">
+      <div class="login-title">Agent Sign In</div>
+      <div class="login-desc">Enter your company email to access your attendance dashboard. Access is restricted to registered agents only.</div>
+
+      <div class="late-notice" id="late-notice">
+        ⚠️ It's past <span id="late-time-display">09:00</span> — logging in after your scheduled shift start will be flagged as late.
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="email-input">Agent Email Address</label>
+        <input class="field-input" id="email-input" type="email" placeholder="you@company.com" autocomplete="email" spellcheck="false"/>
+        <div class="field-err" id="email-error">Email not recognized. Contact your supervisor.</div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="name-input">Full Name</label>
+        <input class="field-input" id="name-input" type="text" placeholder="Your full name" autocomplete="name" spellcheck="false"/>
+        <div class="field-err" id="name-error">Please enter your name.</div>
+      </div>
+
+      <button class="btn-primary" id="login-btn" onclick="handleLogin()">Access Dashboard</button>
+    </div>
+
+    <div class="login-footer">
+      Access restricted to registered agents only.<br/>
+      Contact your team lead if you cannot log in.<br/>
+      <span style="color:var(--text-4);cursor:pointer;text-decoration:underline;font-size:10px;" onclick="openConfig()">Configure Google Sheets Integration</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     DASHBOARD SCREEN
+══════════════════════════════════ -->
+<div class="screen hidden" id="screen-dashboard">
+  <div class="dash-scroll">
+    <div class="dash-layout">
+
+      <!-- Topbar -->
+      <div class="topbar">
+        <div class="topbar-left">
+          <!-- Shiftly mini logo in topbar -->
+          <svg width="30" height="30" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;border-radius:8px;">
+            <rect width="38" height="38" rx="10" fill="url(#logoGrad2)"/>
+            <circle cx="19" cy="19" r="10" stroke="rgba(255,255,255,0.15)" stroke-width="1.2" fill="none"/>
+            <line x1="19" y1="19" x2="19" y2="12" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            <line x1="19" y1="19" x2="24" y2="22" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            <path d="M25.5 11.5 C28 14 29 17 28.5 19.5" stroke="var(--cyan)" stroke-width="2" stroke-linecap="round" fill="none"/>
+            <polyline points="25.5,11.5 27.5,14.5 28.8,11.2" stroke="var(--cyan)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <circle cx="19" cy="19" r="2" fill="white"/>
+            <defs>
+              <linearGradient id="logoGrad2" x1="0" y1="0" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#1a2235"/>
+                <stop offset="100%" stop-color="#0d1420"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="avatar" id="dash-avatar" style="margin-left:4px">--</div>
+          <div>
+            <div class="topbar-name" id="dash-name">Agent</div>
+            <div class="topbar-email" id="dash-email">—</div>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="badge-late" id="badge-late">LATE</div>
+          <div class="clock-wrap">
+            <div class="live-clock" id="live-clock">00:00:00</div>
+            <div class="live-date" id="live-date">—</div>
+          </div>
+          <button class="btn-logout" onclick="handleLogout()">Sign Out</button>
+        </div>
+      </div>
+
+      <!-- Status Banner -->
+      <div class="status-banner state-idle" id="status-banner">
+        <div class="status-left">
+          <div class="status-dot"></div>
+          <div>
+            <div class="status-label" id="status-label">Not on Shift</div>
+            <div class="status-sub" id="status-sub">Start your shift to begin tracking</div>
+          </div>
+        </div>
+        <div class="elapsed-wrap">
+          <div class="elapsed-timer" id="elapsed-timer">00:00:00</div>
+          <div class="elapsed-label" id="elapsed-label">ELAPSED</div>
+        </div>
+      </div>
+
+      <!-- Stats Row -->
+      <div class="stats-row">
+        <div class="stat-card" id="stat-shift">
+          <div class="stat-label">Shift Time</div>
+          <div class="stat-value" id="stat-shift-val">—</div>
+          <div class="stat-sub" id="stat-shift-sub">Not started</div>
+        </div>
+        <div class="stat-card" id="stat-break">
+          <div class="stat-label">Break Duration</div>
+          <div class="stat-value" id="stat-break-val">—</div>
+          <div class="stat-sub" id="stat-break-sub">No break taken</div>
+        </div>
+        <div class="stat-card" id="stat-net">
+          <div class="stat-label">Net Hours</div>
+          <div class="stat-value" id="stat-net-val">—</div>
+          <div class="stat-sub" id="stat-net-sub">Excl. break & lunch</div>
+        </div>
+      </div>
+
+      <!-- Action Grid -->
+      <div class="action-grid" id="action-grid">
+        <!-- Start Shift -->
+        <button class="action-btn variant-green" id="btn-start-shift" onclick="doStartShift()">
+          <div class="action-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+          <div class="action-name">Start Shift</div>
+          <div class="action-desc" id="ss-desc">Begin your working session and start time tracking.</div>
+          <div class="action-time-tag" id="tag-shift-start">—</div>
+        </button>
+
+        <!-- Break -->
+        <button class="action-btn variant-amber" id="btn-break" disabled onclick="doBreak()">
+          <div class="action-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/>
+            </svg>
+          </div>
+          <div class="action-name" id="break-btn-label">Start Break</div>
+          <div class="action-desc" id="break-btn-desc">Pause tracking. A reason is required.</div>
+          <div class="action-time-tag" id="tag-break-start">—</div>
+        </button>
+
+        <!-- Lunch -->
+        <button class="action-btn variant-cyan" id="btn-lunch" disabled onclick="doLunch()">
+          <div class="action-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/>
+            </svg>
+          </div>
+          <div class="action-name" id="lunch-btn-label">Start Lunch</div>
+          <div class="action-desc" id="lunch-btn-desc">Begin your lunch break period.</div>
+          <div class="action-time-tag" id="tag-lunch-start">—</div>
+        </button>
+
+        <!-- End Shift -->
+        <button class="action-btn variant-red" id="btn-end-shift" disabled onclick="doEndShift()">
+          <div class="action-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/>
+            </svg>
+          </div>
+          <div class="action-name">End Shift</div>
+          <div class="action-desc">Complete your shift and submit attendance record.</div>
+          <div class="action-time-tag" id="tag-shift-end">—</div>
+        </button>
+      </div>
+
+      <!-- Shift Complete Card (shown after end shift) -->
+      <div class="complete-card" id="complete-card">
+        <div class="complete-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <div class="complete-title">Shift Complete!</div>
+        <div class="complete-sub" id="complete-sub">Your attendance has been recorded.</div>
+        <div class="complete-stats">
+          <div class="cstat"><div class="cstat-val" id="cs-gross">—</div><div class="cstat-lbl">Gross Hours</div></div>
+          <div class="cstat"><div class="cstat-val" id="cs-break">—</div><div class="cstat-lbl">Break + Lunch</div></div>
+          <div class="cstat"><div class="cstat-val" id="cs-net">—</div><div class="cstat-lbl">Net Hours</div></div>
+        </div>
+        <button class="btn-new-shift" onclick="resetForNewShift()">Start New Shift</button>
+      </div>
+
+      <!-- Bottom Panels -->
+      <div class="panels-row">
+        <!-- Activity Log -->
+        <div class="log-panel">
+          <div class="panel-header">
+            <span class="panel-title">Activity Log</span>
+            <span class="panel-badge" id="log-count">0 events</span>
+          </div>
+          <div class="log-body" id="log-body">
+            <div class="log-empty" id="log-empty">No activity yet</div>
+          </div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="timeline-panel">
+          <div class="panel-header">
+            <span class="panel-title">Today's Timeline</span>
+            <span class="panel-badge" id="sync-status-text">Not synced</span>
+          </div>
+          <div class="timeline-body" id="timeline-body">
+            <div class="log-empty" style="padding:24px 0">No events yet</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sync Bar -->
+      <div class="sync-bar">
+        <div class="sync-dot" id="sync-dot"></div>
+        <span id="sync-label">Local only — configure Sheets integration to sync</span>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     BREAK MODAL
+══════════════════════════════════ -->
+<div class="modal-overlay" id="break-modal">
+  <div class="modal-card">
+    <div class="modal-title">Break Reason</div>
+    <div class="modal-sub">Select a reason or enter a custom one. This is required before starting your break.</div>
+
+    <div class="reason-grid">
+      <button class="reason-opt" onclick="selectReason(this,'Personal')">Personal</button>
+      <button class="reason-opt" onclick="selectReason(this,'Restroom')">Restroom</button>
+      <button class="reason-opt" onclick="selectReason(this,'Prayer Break')">Prayer Break</button>
+      <button class="reason-opt" onclick="selectReason(this,'Health Issue')">Health Issue</button>
+      <button class="reason-opt" onclick="selectReason(this,'Team Meeting')">Team Meeting</button>
+      <button class="reason-opt" onclick="selectReason(this,'Technical Issue')">Technical Issue</button>
+    </div>
+
+    <div class="reason-divider">or type custom reason</div>
+
+    <textarea class="reason-custom" id="reason-custom" placeholder="Describe your break reason..." oninput="clearSelected()"></textarea>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-confirm" onclick="confirmBreak()">Start Break</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     TOAST STACK
+══════════════════════════════════ -->
+<div class="toast-stack" id="toast-stack"></div>
+
+<!-- ══════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════ -->
+<script>
+// ════════════════════════════════════════════════
+//  CONFIGURATION & CONSTANTS
+// ════════════════════════════════════════════════
+const STATES = { IDLE: 'IDLE', SHIFT: 'SHIFT', BREAK: 'BREAK', LUNCH: 'LUNCH', DONE: 'DONE' };
+const STORAGE_KEY = 'attendai_state_v3';
+const CONFIG_KEY  = 'attendai_config_v1';
+
+let config = {
+  sheetUrl: '',
+  shiftStartTime: '09:00',
+  allowedEmails: []
+};
+
+let state = {
+  agent: { name: '', email: '' },
+  phase: STATES.IDLE,
+  shiftStart: null,
+  breakStart: null, breakEnd: null, breakReason: '',
+  lunchStart: null, lunchEnd: null,
+  shiftEnd: null,
+  isLate: false,
+  date: ''
+};
+
+let elapsedInterval = null;
+let clockInterval   = null;
+let logCount = 0;
+let selectedReason = '';
+let netMillis = 0;
+
+// ════════════════════════════════════════════════
+//  PERSISTENCE
+// ════════════════════════════════════════════════
+function saveState() {
+  try {
+    const toStore = JSON.parse(JSON.stringify(state));
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(toStore));
+  } catch(e) {}
+}
+
+function loadState() {
+  try {
+    const raw = sessionStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.agent && parsed.agent.email) {
+        state = parsed;
+        return true;
+      }
+    }
+  } catch(e) {}
+  return false;
+}
+
+function loadConfig() {
+  try {
+    const raw = localStorage.getItem(CONFIG_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      config = { ...config, ...parsed };
+    }
+  } catch(e) {}
+}
+
+function saveConfig() {
+  const url       = document.getElementById('cfg-url').value.trim();
+  const timeVal   = document.getElementById('cfg-shift-time').value || '09:00';
+  const emailsRaw = document.getElementById('cfg-emails').value.trim();
+  const emails    = emailsRaw ? emailsRaw.split(',').map(e => e.trim().toLowerCase()).filter(Boolean) : [];
+
+  config.sheetUrl       = url;
+  config.shiftStartTime = timeVal;
+  config.allowedEmails  = emails;
+
+  try { localStorage.setItem(CONFIG_KEY, JSON.stringify(config)); } catch(e) {}
+  closeConfig();
+  showToast('Configuration saved.', 'success');
+}
+
+// ════════════════════════════════════════════════
+//  CONFIG MODAL
+// ════════════════════════════════════════════════
+function openConfig() {
+  document.getElementById('cfg-url').value          = config.sheetUrl || '';
+  document.getElementById('cfg-shift-time').value   = config.shiftStartTime || '09:00';
+  document.getElementById('cfg-emails').value       = config.allowedEmails.join(', ');
+  document.getElementById('config-modal').classList.add('open');
+}
+
+function closeConfig() {
+  document.getElementById('config-modal').classList.remove('open');
+}
+
+// ════════════════════════════════════════════════
+//  CLOCK & DATE
+// ════════════════════════════════════════════════
+function startClock() {
+  function tick() {
+    const now = new Date();
+    document.getElementById('live-clock').textContent =
+      now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    document.getElementById('live-date').textContent =
+      now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  }
+  tick();
+  clockInterval = setInterval(tick, 1000);
+}
+
+function isLateLogin() {
+  const [h, m] = (config.shiftStartTime || '09:00').split(':').map(Number);
+  const now = new Date();
+  return now.getHours() > h || (now.getHours() === h && now.getMinutes() > m);
+}
+
+// ════════════════════════════════════════════════
+//  ELAPSED TIMER
+// ════════════════════════════════════════════════
+function startElapsed(fromTs) {
+  stopElapsed();
+  elapsedInterval = setInterval(() => {
+    const ms  = Date.now() - fromTs;
+    document.getElementById('elapsed-timer').textContent = formatDuration(ms);
+    updateNetDisplay();
+  }, 1000);
+}
+
+function stopElapsed(finalLabel) {
+  if (elapsedInterval) { clearInterval(elapsedInterval); elapsedInterval = null; }
+  if (finalLabel) document.getElementById('elapsed-timer').textContent = finalLabel;
+}
+
+function formatDuration(ms) {
+  if (!ms || ms < 0) ms = 0;
+  const totalSec = Math.floor(ms / 1000);
+  const h = String(Math.floor(totalSec / 3600)).padStart(2, '0');
+  const m = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0');
+  const s = String(totalSec % 60).padStart(2, '0');
+  return `${h}:${m}:${s}`;
+}
+
+function formatShort(ms) {
+  if (!ms || ms < 0) return '0m';
+  const h = Math.floor(ms / 3600000);
+  const m = Math.floor((ms % 3600000) / 60000);
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
+
+function fmt(ts) {
+  if (!ts) return '';
+  return new Date(ts).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+}
+
+function updateNetDisplay() {
+  if (!state.shiftStart) return;
+  const now      = state.shiftEnd || Date.now();
+  const brk      = (state.breakStart && state.breakEnd) ? state.breakEnd - state.breakStart : 0;
+  const lnch     = (state.lunchStart && state.lunchEnd) ? state.lunchEnd - state.lunchStart : 0;
+  netMillis      = now - state.shiftStart - brk - lnch;
+  document.getElementById('stat-net-val').textContent = formatDuration(netMillis);
+  if (state.phase === STATES.SHIFT) {
+    document.getElementById('stat-shift-val').textContent = formatDuration(now - state.shiftStart);
+  }
+  if (brk > 0) document.getElementById('stat-break-val').textContent = formatShort(brk + lnch);
+}
+
+// ════════════════════════════════════════════════
+//  LOGIN
+// ════════════════════════════════════════════════
+function handleLogin() {
+  const email = document.getElementById('email-input').value.trim().toLowerCase();
+  const name  = document.getElementById('name-input').value.trim();
+  let ok = true;
+
+  document.getElementById('email-input').classList.remove('err');
+  document.getElementById('name-input').classList.remove('err');
+  document.getElementById('email-error').classList.remove('show');
+  document.getElementById('name-error').classList.remove('show');
+
+  if (!name) {
+    document.getElementById('name-input').classList.add('err');
+    document.getElementById('name-error').classList.add('show');
+    ok = false;
+  }
+
+  if (!email || !email.includes('@')) {
+    document.getElementById('email-input').classList.add('err');
+    document.getElementById('email-error').textContent = 'Please enter a valid email address.';
+    document.getElementById('email-error').classList.add('show');
+    ok = false;
+  } else if (config.allowedEmails.length > 0 && !config.allowedEmails.includes(email)) {
+    document.getElementById('email-input').classList.add('err');
+    document.getElementById('email-error').textContent = 'Email not recognized. Contact your supervisor.';
+    document.getElementById('email-error').classList.add('show');
+    ok = false;
+  }
+
+  if (!ok) return;
+
+  state.agent = { name, email };
+  state.isLate = isLateLogin();
+  state.date = new Date().toLocaleDateString('en-US');
+
+  saveState();
+  showDashboard();
+}
+
+document.getElementById('email-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('name-input').focus();
+});
+document.getElementById('name-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') handleLogin();
+});
+
+// ════════════════════════════════════════════════
+//  SHOW / HIDE SCREENS
+// ════════════════════════════════════════════════
+function showDashboard() {
+  document.getElementById('screen-login').classList.add('hidden');
+  document.getElementById('screen-dashboard').classList.remove('hidden');
+
+  const parts = state.agent.name.trim().split(' ');
+  const initials = parts.length > 1
+    ? (parts[0][0] + parts[parts.length-1][0]).toUpperCase()
+    : parts[0].substring(0,2).toUpperCase();
+
+  document.getElementById('dash-avatar').textContent = initials;
+  document.getElementById('dash-name').textContent   = state.agent.name;
+  document.getElementById('dash-email').textContent  = state.agent.email;
+
+  if (state.isLate) {
+    document.getElementById('badge-late').classList.add('show');
+  }
+
+  startClock();
+  restoreSessionUI();
+  updateUI();
+}
+
+function showLogin() {
+  document.getElementById('screen-dashboard').classList.add('hidden');
+  document.getElementById('screen-login').classList.remove('hidden');
+  stopElapsed();
+  if (clockInterval) { clearInterval(clockInterval); clockInterval = null; }
+}
+
+function handleLogout() {
+  if (state.phase !== STATES.IDLE && state.phase !== STATES.DONE) {
+    showToast('Please end your shift before signing out.', 'error');
+    return;
+  }
+  sessionStorage.removeItem(STORAGE_KEY);
+  state = { agent:{name:'',email:''}, phase:STATES.IDLE, shiftStart:null, breakStart:null, breakEnd:null, breakReason:'', lunchStart:null, lunchEnd:null, shiftEnd:null, isLate:false, date:'' };
+  logCount = 0;
+  document.getElementById('log-body').innerHTML = '<div class="log-empty" id="log-empty">No activity yet</div>';
+  document.getElementById('log-count').textContent = '0 events';
+  document.getElementById('timeline-body').innerHTML = '<div class="log-empty" style="padding:24px 0">No events yet</div>';
+  document.getElementById('complete-card').classList.remove('show');
+  document.getElementById('action-grid').style.display = '';
+  document.getElementById('badge-late').classList.remove('show');
+  showLogin();
+}
+
+// ════════════════════════════════════════════════
+//  RESTORE SESSION
+// ════════════════════════════════════════════════
+function restoreSessionUI() {
+  if (state.shiftStart) {
+    document.getElementById('tag-shift-start').textContent = fmt(state.shiftStart);
+    document.getElementById('stat-shift-sub').textContent  = `Started ${fmt(state.shiftStart)}`;
+    document.getElementById('stat-shift-val').textContent  = formatDuration(Date.now() - state.shiftStart);
+    addTimelineEvent('Shift started', fmt(state.shiftStart), 'done-green');
+  }
+  if (state.breakStart) {
+    document.getElementById('tag-break-start').textContent = fmt(state.breakStart);
+    addTimelineEvent(`Break: "${state.breakReason}"`, fmt(state.breakStart), 'done-amber');
+  }
+  if (state.breakEnd) {
+    addTimelineEvent('Break ended', fmt(state.breakEnd), 'done-amber');
+    const brkMs = state.breakEnd - state.breakStart;
+    document.getElementById('stat-break-val').textContent = formatShort(brkMs);
+    document.getElementById('stat-break-sub').textContent = `${fmt(state.breakStart)} – ${fmt(state.breakEnd)}`;
+  }
+  if (state.lunchStart) {
+    document.getElementById('tag-lunch-start').textContent = fmt(state.lunchStart);
+    addTimelineEvent('Lunch started', fmt(state.lunchStart), 'done-cyan');
+  }
+  if (state.lunchEnd) {
+    addTimelineEvent('Lunch ended', fmt(state.lunchEnd), 'done-cyan');
+  }
+  if (state.shiftEnd) {
+    document.getElementById('tag-shift-end').textContent = fmt(state.shiftEnd);
+    addTimelineEvent('Shift ended', fmt(state.shiftEnd), 'done-red');
+  }
+
+  if (state.phase === STATES.SHIFT)  startElapsed(state.shiftStart);
+  if (state.phase === STATES.BREAK)  startElapsed(state.breakStart);
+  if (state.phase === STATES.LUNCH)  startElapsed(state.lunchStart);
+  if (state.phase === STATES.DONE) {
+    document.getElementById('complete-card').classList.add('show');
+    document.getElementById('action-grid').style.display = 'none';
+    showCompleteCard();
+  }
+
+  updateNetDisplay();
+  showToast('Session restored from previous state.', 'info');
+}
+
+// ════════════════════════════════════════════════
+//  SHIFT ACTIONS
+// ════════════════════════════════════════════════
+function doStartShift() {
+  if (state.phase !== STATES.IDLE) { showToast('Shift already active.', 'error'); return; }
+
+  state.shiftStart = Date.now();
+  state.phase = STATES.SHIFT;
+
+  document.getElementById('tag-shift-start').textContent = fmt(state.shiftStart);
+  document.getElementById('stat-shift-sub').textContent  = `Started ${fmt(state.shiftStart)}`;
+  document.getElementById('stat-shift-val').textContent  = '00:00:00';
+  document.getElementById('stat-shift').classList.add('active-green');
+
+  addLog('Shift started', 'green');
+  addTimelineEvent('Shift started', fmt(state.shiftStart), 'done-green');
+  startElapsed(state.shiftStart);
+  saveState();
+  updateUI();
+  showToast('Shift started. Good luck!', 'success');
+}
+
+function doBreak() {
+  if (state.phase === STATES.SHIFT) {
+    if (state.breakEnd) { showToast('You already used your break.', 'error'); return; }
+    openModal();
+  } else if (state.phase === STATES.BREAK) {
+    state.breakEnd = Date.now();
+    state.phase    = STATES.SHIFT;
+    const brkMs    = state.breakEnd - state.breakStart;
+
+    document.getElementById('stat-break-val').textContent = formatShort(brkMs);
+    document.getElementById('stat-break-sub').textContent = `${fmt(state.breakStart)} – ${fmt(state.breakEnd)}`;
+    document.getElementById('stat-break').classList.remove('active-amber');
+
+    addLog('Break ended', 'amber');
+    addTimelineEvent('Break ended', fmt(state.breakEnd), 'done-amber');
+    startElapsed(state.shiftStart);
+    saveState();
+    updateUI();
+    showToast('Break ended. Welcome back!', 'success');
+  } else {
+    showToast('No active break to end.', 'error');
+  }
+}
+
+function doLunch() {
+  if (state.phase === STATES.SHIFT) {
+    if (state.lunchEnd) { showToast('Lunch already taken.', 'error'); return; }
+    state.lunchStart = Date.now();
+    state.phase = STATES.LUNCH;
+    document.getElementById('tag-lunch-start').textContent = fmt(state.lunchStart);
+    document.getElementById('stat-break').classList.add('active-cyan');
+    addLog('Lunch break started', 'cyan');
+    addTimelineEvent('Lunch started', fmt(state.lunchStart), 'done-cyan');
+    startElapsed(state.lunchStart);
+    saveState();
+    updateUI();
+    showToast('Enjoy your lunch!', 'success');
+  } else if (state.phase === STATES.LUNCH) {
+    state.lunchEnd = Date.now();
+    state.phase    = STATES.SHIFT;
+    const lnchMs   = state.lunchEnd - state.lunchStart;
+    const brkMs    = state.breakEnd ? state.breakEnd - state.breakStart : 0;
+
+    document.getElementById('stat-break-val').textContent = formatShort(brkMs + lnchMs);
+    document.getElementById('stat-break-sub').textContent = `Lunch ${fmt(state.lunchStart)}–${fmt(state.lunchEnd)}`;
+    document.getElementById('stat-break').classList.remove('active-cyan');
+
+    addLog('Lunch ended', 'cyan');
+    addTimelineEvent('Lunch ended', fmt(state.lunchEnd), 'done-cyan');
+    startElapsed(state.shiftStart);
+    saveState();
+    updateUI();
+    showToast('Lunch ended. Back to work!', 'success');
+  } else {
+    showToast('You can only take lunch during an active shift.', 'error');
+  }
+}
+
+function doEndShift() {
+  if (state.phase !== STATES.SHIFT) {
+    const msgs = {
+      [STATES.IDLE]:  'Start your shift first.',
+      [STATES.BREAK]: 'End your break before ending the shift.',
+      [STATES.LUNCH]: 'End your lunch before ending the shift.',
+    };
+    showToast(msgs[state.phase] || 'Cannot end shift now.', 'error');
+    return;
+  }
+
+  state.shiftEnd = Date.now();
+  state.phase    = STATES.DONE;
+
+  const brk   = (state.breakStart && state.breakEnd) ? state.breakEnd - state.breakStart : 0;
+  const lnch  = (state.lunchStart && state.lunchEnd) ? state.lunchEnd - state.lunchStart : 0;
+  netMillis   = state.shiftEnd - state.shiftStart - brk - lnch;
+  const gross = state.shiftEnd - state.shiftStart;
+
+  document.getElementById('tag-shift-end').textContent = fmt(state.shiftEnd);
+
+  addLog(`Shift ended — Net: ${formatDuration(netMillis)}`, 'red');
+  addTimelineEvent('Shift ended', fmt(state.shiftEnd), 'done-red');
+  stopElapsed(formatDuration(netMillis));
+
+  showCompleteCard(gross, brk + lnch, netMillis);
+  saveState();
+  updateUI();
+  submitRecord(netMillis);
+  showToast(`Shift complete! Net: ${formatDuration(netMillis)}`, 'success');
+
+  document.getElementById('action-grid').style.display = 'none';
+  document.getElementById('complete-card').classList.add('show');
+}
+
+function showCompleteCard(gross, deduct, net) {
+  if (!gross) {
+    gross  = state.shiftEnd - state.shiftStart;
+    const brk  = (state.breakStart && state.breakEnd) ? state.breakEnd - state.breakStart : 0;
+    const lnch = (state.lunchStart && state.lunchEnd) ? state.lunchEnd - state.lunchStart : 0;
+    deduct = brk + lnch;
+    net    = gross - deduct;
+  }
+  document.getElementById('cs-gross').textContent = formatDuration(gross);
+  document.getElementById('cs-break').textContent = formatShort(deduct) || '0m';
+  document.getElementById('cs-net').textContent   = formatDuration(net);
+  document.getElementById('complete-sub').textContent =
+    `Ended at ${fmt(state.shiftEnd)} on ${state.date}${state.isLate ? ' · Flagged: late start' : ''}`;
+}
+
+function resetForNewShift() {
+  const email = state.agent.email;
+  const name  = state.agent.name;
+  sessionStorage.removeItem(STORAGE_KEY);
+  state = { agent:{name, email}, phase:STATES.IDLE, shiftStart:null, breakStart:null, breakEnd:null, breakReason:'', lunchStart:null, lunchEnd:null, shiftEnd:null, isLate:false, date:new Date().toLocaleDateString('en-US') };
+  logCount = 0;
+  netMillis = 0;
+  document.getElementById('log-body').innerHTML = '<div class="log-empty" id="log-empty">No activity yet</div>';
+  document.getElementById('log-count').textContent = '0 events';
+  document.getElementById('timeline-body').innerHTML = '<div class="log-empty" style="padding:24px 0">No events yet</div>';
+  document.getElementById('complete-card').classList.remove('show');
+  document.getElementById('action-grid').style.display = '';
+  document.getElementById('elapsed-timer').textContent = '00:00:00';
+  document.getElementById('stat-shift-val').textContent = '—';
+  document.getElementById('stat-break-val').textContent = '—';
+  document.getElementById('stat-net-val').textContent   = '—';
+  document.getElementById('stat-shift-sub').textContent = 'Not started';
+  document.getElementById('stat-break-sub').textContent = 'No break taken';
+  document.getElementById('stat-net-sub').textContent   = 'Excl. break & lunch';
+  document.getElementById('stat-shift').className = 'stat-card';
+  document.getElementById('stat-break').className = 'stat-card';
+  ['tag-shift-start','tag-break-start','tag-lunch-start','tag-shift-end'].forEach(id => {
+    document.getElementById(id).textContent = '—';
+  });
+  updateUI();
+  showToast('Ready for a new shift!', 'info');
+}
+
+// ════════════════════════════════════════════════
+//  UI UPDATE
+// ════════════════════════════════════════════════
+function updateUI() {
+  const banner = document.getElementById('status-banner');
+  const label  = document.getElementById('status-label');
+  const sub    = document.getElementById('status-sub');
+  const brkBtn = document.getElementById('btn-break');
+  const lnchBtn= document.getElementById('btn-lunch');
+  const brkLbl = document.getElementById('break-btn-label');
+  const brkDsc = document.getElementById('break-btn-desc');
+  const lnchLbl= document.getElementById('lunch-btn-label');
+  const lnchDsc= document.getElementById('lunch-btn-desc');
+
+  banner.className = 'status-banner';
+
+  switch(state.phase) {
+    case STATES.IDLE:
+      banner.classList.add('state-idle');
+      label.textContent = 'Not on Shift';
+      sub.textContent   = 'Start your shift to begin tracking';
+      document.getElementById('btn-start-shift').disabled = false;
+      brkBtn.disabled   = true;
+      lnchBtn.disabled  = true;
+      document.getElementById('btn-end-shift').disabled = true;
+      document.getElementById('elapsed-label').textContent = 'ELAPSED';
+      break;
+
+    case STATES.SHIFT:
+      banner.classList.add('state-shift');
+      label.textContent = 'On Shift';
+      sub.textContent   = `Since ${fmt(state.shiftStart)}${state.isLate ? ' · Late Start' : ''}`;
+      document.getElementById('btn-start-shift').disabled = true;
+      brkBtn.disabled   = !!state.breakEnd;
+      lnchBtn.disabled  = !!state.lunchEnd;
+      document.getElementById('btn-end-shift').disabled = false;
+      document.getElementById('elapsed-label').textContent = 'SHIFT ELAPSED';
+
+      brkLbl.textContent  = state.breakEnd ? 'Break Taken ✓' : 'Start Break';
+      brkDsc.textContent  = state.breakEnd ? `${fmt(state.breakStart)} → ${fmt(state.breakEnd)}` : 'Pause tracking. A reason is required.';
+      lnchLbl.textContent = state.lunchEnd ? 'Lunch Taken ✓' : 'Start Lunch';
+      lnchDsc.textContent = state.lunchEnd ? `${fmt(state.lunchStart)} → ${fmt(state.lunchEnd)}` : 'Begin your lunch break period.';
+      break;
+
+    case STATES.BREAK:
+      banner.classList.add('state-break');
+      label.textContent = 'On Break';
+      sub.textContent   = `Since ${fmt(state.breakStart)} · "${state.breakReason}"`;
+      document.getElementById('btn-start-shift').disabled = true;
+      brkBtn.disabled   = false;
+      lnchBtn.disabled  = true;
+      document.getElementById('btn-end-shift').disabled = true;
+      document.getElementById('elapsed-label').textContent = 'BREAK ELAPSED';
+      brkLbl.textContent = 'End Break';
+      brkDsc.textContent = `Reason: ${state.breakReason}`;
+      document.getElementById('stat-break').classList.add('active-amber');
+      break;
+
+    case STATES.LUNCH:
+      banner.classList.add('state-lunch');
+      label.textContent = 'On Lunch';
+      sub.textContent   = `Since ${fmt(state.lunchStart)}`;
+      document.getElementById('btn-start-shift').disabled = true;
+      brkBtn.disabled   = true;
+      lnchBtn.disabled  = false;
+      document.getElementById('btn-end-shift').disabled = true;
+      document.getElementById('elapsed-label').textContent = 'LUNCH ELAPSED';
+      lnchLbl.textContent = 'End Lunch';
+      lnchDsc.textContent = 'Return from your lunch break.';
+      break;
+
+    case STATES.DONE:
+      banner.classList.add('state-done');
+      label.textContent = 'Shift Complete';
+      sub.textContent   = `Ended at ${fmt(state.shiftEnd)}`;
+      document.getElementById('btn-start-shift').disabled = true;
+      brkBtn.disabled   = true;
+      lnchBtn.disabled  = true;
+      document.getElementById('btn-end-shift').disabled = true;
+      document.getElementById('elapsed-label').textContent = 'NET HOURS';
+      break;
+  }
+}
+
+// ════════════════════════════════════════════════
+//  BREAK MODAL
+// ════════════════════════════════════════════════
+function openModal() {
+  selectedReason = '';
+  document.getElementById('reason-custom').value = '';
+  document.querySelectorAll('.reason-opt').forEach(b => b.classList.remove('selected'));
+  document.getElementById('break-modal').classList.add('open');
+}
+
+function closeModal() { document.getElementById('break-modal').classList.remove('open'); }
+
+function selectReason(el, reason) {
+  document.querySelectorAll('.reason-opt').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedReason = reason;
+  document.getElementById('reason-custom').value = '';
+}
+
+function clearSelected() {
+  document.querySelectorAll('.reason-opt').forEach(b => b.classList.remove('selected'));
+  selectedReason = '';
+}
+
+function confirmBreak() {
+  const custom = document.getElementById('reason-custom').value.trim();
+  const reason = custom || selectedReason;
+  if (!reason) { showToast('Please select or enter a break reason.', 'error'); return; }
+
+  state.breakReason = reason;
+  state.breakStart  = Date.now();
+  state.phase       = STATES.BREAK;
+
+  document.getElementById('tag-break-start').textContent = fmt(state.breakStart);
+  addLog(`Break started: "${reason}"`, 'amber');
+  addTimelineEvent(`Break: ${reason}`, fmt(state.breakStart), 'done-amber');
+  startElapsed(state.breakStart);
+  closeModal();
+  saveState();
+  updateUI();
+  showToast('Break started.', 'warning');
+}
+
+document.getElementById('break-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// ════════════════════════════════════════════════
+//  ACTIVITY LOG
+// ════════════════════════════════════════════════
+function addLog(message, type) {
+  logCount++;
+  const body = document.getElementById('log-body');
+  const empty = document.getElementById('log-empty');
+  if (empty) empty.remove();
+
+  const pillMap = {
+    green:  '<span class="log-pill pill-green">SHIFT</span>',
+    amber:  '<span class="log-pill pill-amber">BREAK</span>',
+    cyan:   '<span class="log-pill pill-cyan">LUNCH</span>',
+    red:    '<span class="log-pill pill-red">END</span>',
+    purple: '<span class="log-pill pill-purple">INFO</span>',
+  };
+
+  const first = state.agent.name.split(' ')[0];
+  const entry = document.createElement('div');
+  entry.className = 'log-entry';
+  entry.innerHTML = `
+    <div class="log-time">${new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false})}</div>
+    <div class="log-msg"><strong>${first}</strong> — ${message}</div>
+    ${pillMap[type] || ''}
+  `;
+  body.insertBefore(entry, body.firstChild);
+  document.getElementById('log-count').textContent = `${logCount} event${logCount !== 1 ? 's' : ''}`;
+}
+
+// ════════════════════════════════════════════════
+//  TIMELINE
+// ════════════════════════════════════════════════
+let timelineCount = 0;
+
+function addTimelineEvent(label, time, dotClass) {
+  const body = document.getElementById('timeline-body');
+  const empty = body.querySelector('.log-empty');
+  if (empty) empty.remove();
+
+  timelineCount++;
+  const item = document.createElement('div');
+  item.className = 'timeline-item';
+  item.innerHTML = `
+    ${timelineCount > 1 ? '<div class="timeline-line"></div>' : ''}
+    <div class="timeline-dot ${dotClass}"></div>
+    <div class="timeline-content">
+      <div class="timeline-event">${label}</div>
+      <div class="timeline-time">${time}</div>
+    </div>
+  `;
+  body.appendChild(item);
+}
+
+// ════════════════════════════════════════════════
+//  TOAST
+// ════════════════════════════════════════════════
+function showToast(message, type = 'success') {
+  const stack = document.getElementById('toast-stack');
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.innerHTML = `<div class="toast-accent"></div>${message}`;
+  stack.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(16px)';
+    toast.style.transition = 'all 0.3s ease';
+    setTimeout(() => toast.remove(), 300);
+  }, 3500);
+}
+
+// ════════════════════════════════════════════════
+//  GOOGLE SHEETS SUBMISSION
+// ════════════════════════════════════════════════
+function setSyncStatus(status) {
+  const dot   = document.getElementById('sync-dot');
+  const label = document.getElementById('sync-label');
+  const badge = document.getElementById('sync-status-text');
+  dot.className = `sync-dot ${status}`;
+
+  const map = {
+    syncing: ['Syncing with Google Sheets...', 'Syncing...'],
+    synced:  [`Synced at ${new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true})}`, 'Synced ✓'],
+    error:   ['Sync failed — saved locally', 'Sync failed'],
+    '':      ['Local only — configure Sheets integration to sync', 'Not synced'],
+  };
+  const entry = map[status] || map[''];
+  label.textContent = entry[0];
+  badge.textContent = entry[1];
+}
+
+function submitRecord(netMs) {
+  const record = {
+    date:          state.date,
+    agent_name:    state.agent.name,
+    agent_email:   state.agent.email,
+    shift_start:   fmt(state.shiftStart),
+    shift_start_ts:state.shiftStart,
+    break_start:   fmt(state.breakStart) || '',
+    break_end:     fmt(state.breakEnd)   || '',
+    break_reason:  state.breakReason || '',
+    break_duration:state.breakStart && state.breakEnd ? formatShort(state.breakEnd - state.breakStart) : '',
+    lunch_start:   fmt(state.lunchStart) || '',
+    lunch_end:     fmt(state.lunchEnd)   || '',
+    lunch_duration:state.lunchStart && state.lunchEnd ? formatShort(state.lunchEnd - state.lunchStart) : '',
+    shift_end:     fmt(state.shiftEnd),
+    shift_end_ts:  state.shiftEnd,
+    gross_hours:   formatDuration(state.shiftEnd - state.shiftStart),
+    net_hours:     formatDuration(netMs),
+    net_minutes:   Math.floor(netMs / 60000),
+    is_late:       state.isLate ? 'YES' : 'NO',
+    status:        'Complete',
+  };
+
+  console.log('[Shiftly] Attendance Record:', JSON.stringify(record, null, 2));
+
+  if (!config.sheetUrl) {
+    setSyncStatus('');
+    showToast('No Google Sheets URL configured. Record logged locally.', 'info');
+    return;
+  }
+
+  setSyncStatus('syncing');
+
+  fetch(config.sheetUrl, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(record)
+  })
+  .then(() => {
+    setSyncStatus('synced');
+    showToast('Record synced to Google Sheets ✓', 'success');
+  })
+  .catch(err => {
+    console.error('[Shiftly] Sync failed:', err);
+    setSyncStatus('error');
+    showToast('Sync failed. Check your Apps Script URL.', 'error');
+  });
+}
+
+// ════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════
+function init() {
+  loadConfig();
+
+  // Show late notice on login screen
+  const [h, m] = (config.shiftStartTime || '09:00').split(':').map(Number);
+  document.getElementById('late-time-display').textContent = config.shiftStartTime || '09:00';
+  if (isLateLogin()) {
+    document.getElementById('late-notice').classList.add('show');
+  }
+
+  // Pre-fill config modal
+  document.getElementById('cfg-shift-time').value = config.shiftStartTime || '09:00';
+
+  // Try restoring session
+  if (loadState() && state.agent.email) {
+    showDashboard();
+    return;
+  }
+
+  // Open config on first use if no URL set
+  if (!config.sheetUrl && !localStorage.getItem('attendai_config_seen')) {
+    localStorage.setItem('attendai_config_seen', '1');
+    // Optional: auto-open config on first visit
+    // openConfig();
+  }
+
+  updateUI();
+}
+
+init();
+</script>
+
+<!--
+════════════════════════════════════════════════════
+  GOOGLE APPS SCRIPT BACKEND (apps-script.gs)
+  Deploy as Web App with "Execute as Me" and
+  "Anyone" access. Paste the URL in configuration.
+════════════════════════════════════════════════════
+
+function doPost(e) {
+  try {
+    const data   = JSON.parse(e.postData.contents);
+    const ss     = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet  = ss.getSheetByName('Attendance') || ss.insertSheet('Attendance');
+
+    if (sheet.getLastRow() === 0) {
+      sheet.appendRow([
+        'Date','Agent Name','Agent Email',
+        'Shift Start','Break Start','Break End','Break Reason','Break Duration',
+        'Lunch Start','Lunch End','Lunch Duration',
+        'Shift End','Gross Hours','Net Hours','Net Minutes','Late?','Status'
+      ]);
+      sheet.getRange(1,1,1,17).setFontWeight('bold').setBackground('#1a1e2b').setFontColor('#00e5c8');
+    }
+
+    sheet.appendRow([
+      data.date, data.agent_name, data.agent_email,
+      data.shift_start, data.break_start, data.break_end, data.break_reason, data.break_duration,
+      data.lunch_start, data.lunch_end, data.lunch_duration,
+      data.shift_end, data.gross_hours, data.net_hours, data.net_minutes, data.is_late, data.status
+    ]);
+
+    return ContentService
+      .createTextOutput(JSON.stringify({ success: true }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ success: false, error: err.message }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+-->
+</body>
+</html>
